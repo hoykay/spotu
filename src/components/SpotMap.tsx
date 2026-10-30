@@ -45,6 +45,11 @@ export default function SpotMap({
     });
 
     mapRef.current = map;
+    const resizeObserver = new ResizeObserver(() => {
+  map.resize();
+});
+
+resizeObserver.observe(mapContainer.current);
 
     map.on("load", () => {
       map.resize();
@@ -94,9 +99,10 @@ map.on("moveend", async () => {
 });
 
     return () => {
-      map.remove();
-      mapRef.current = null;
-    };
+  resizeObserver.disconnect();
+  map.remove();
+  mapRef.current = null;
+};
   }, []);
 
   // Move the existing map whenever the selected location changes.
@@ -142,7 +148,7 @@ map.on("moveend", async () => {
 
     onSearchArea(center.lng, center.lat, detectedLabel);
   }}
-  className="absolute bottom-8 left-6 z-10 rounded-xl bg-white px-4 py-3 font-semibold text-[#172341] shadow-md transition hover:text-[#1769ff]"
+  className="absolute left-6 top-6 z-10 rounded-xl bg-white px-4 py-3 font-semibold text-[#172341] shadow-md transition hover:text-[#1769ff]"
 >
   Search this area
 </button>

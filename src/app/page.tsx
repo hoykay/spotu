@@ -57,6 +57,8 @@ type SavedAnalysis = {
   culturalFitIndex: number | null;
   selectedOpportunity: Opportunity | null;
   savedAt: string;
+  locationImage?: string | null;
+  imagePlaceName?: string | null;
 };
 export default function Home() {
   const [selectedConcept, setSelectedConcept] = useState("Restaurant");
@@ -388,7 +390,10 @@ function saveCurrentAnalysis() {
         culturalFitIndex,
         selectedOpportunity,
         savedAt: new Date().toISOString(),
+        locationImage,
+imagePlaceName,
       };
+      
 
       updated = [
         newSavedAnalysis,
@@ -404,6 +409,19 @@ function saveCurrentAnalysis() {
     return updated;
   });
 }
+function removeSavedAnalysis(id: string) {
+  setSavedAnalyses((current) => {
+    const updated = current.filter((saved) => saved.id !== id);
+
+    localStorage.setItem(
+      "spotu-saved-analyses",
+      JSON.stringify(updated)
+    );
+
+    return updated;
+  });
+}
+
 const isCurrentAnalysisSaved = savedAnalyses.some(
   (saved) =>
     saved.address.trim().toLowerCase() ===
@@ -506,42 +524,60 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
 
       {/* Main 3-column layout */}
       {activeTab === "analyze" && (
-      <section className="mx-4 mb-4 mt-2 grid min-h-[calc(100vh-95px)] grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-sm xl:grid-cols-[350px_minmax(520px,1fr)_430px]">
+      <section className="mx-4 mb-4 mt-2 grid grid-cols-1 gap-4 xl:grid-cols-[330px_minmax(600px,1fr)_390px]">
         {/* LEFT */}
-        <aside className="border-b border-slate-100 p-6 xl:border-b-0 xl:border-r xl:p-8">
+        <aside className="border-b border-[#e6edf7] bg-[linear-gradient(180deg,#f7fbff_0%,#ffffff_58%)] p-6 xl:border-b-0 xl:border-r xl:p-8">
 
           <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1769ff]">
   Qloo-powered Opportunity Agent
 </div>
 
-<h1 className="mt-3 max-w-[260px] font-serif text-[48px] font-semibold leading-[0.98] tracking-tight text-[#0a1535]">
-  What belongs here?
+<h1 className="mt-3 max-w-[320px] text-[48px] font-bold leading-[0.98] tracking-[-0.04em] text-[#0a1535]">
+  Find the right business for the{" "}
+  <span className="text-[#1769ff]">right place.</span>
 </h1>
 
-<p className="mt-5 max-w-[300px] text-[17px] leading-7 text-[#53627e]">
-  Enter any location. SpotU reads its cultural signals, evaluates business
-  concepts, and ranks what fits best using Qloo.
+<p className="mt-5 max-w-[320px] text-[16px] leading-7 text-[#5f6f89]">
+  Use Qloo-powered cultural intelligence to understand a neighborhood,
+  compare business ideas, and see which concepts stand out.
 </p>
 
           {/* Location */}
-          <div className="mt-7 flex overflow-hidden rounded-xl border border-[#dfe6f0] bg-white shadow-sm">
-            <div className="flex flex-1 items-center gap-3 px-4">
-              <span className="text-lg text-[#62728e]">●</span>
-              <input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full bg-transparent text-sm text-[#172341] outline-none"
-              />
-            </div>
+          <div className="mt-7 flex items-center gap-2 rounded-2xl border border-[#d9e4f2] bg-white p-2 shadow-[0_8px_30px_rgba(23,105,255,0.08)]">
+  <div className="flex min-w-0 flex-1 items-center gap-3 px-3">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eef5ff] text-[#1769ff]">
+      <svg
+        viewBox="0 0 24 24"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"
+        />
+        <circle cx="12" cy="9" r="2.5" />
+      </svg>
+    </div>
 
-          <button
-  onClick={searchLocation}
-  disabled={searching}
-  className="m-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#2f7df6] text-2xl text-white transition hover:bg-[#1769ff] disabled:opacity-50"
->
-  {searching ? "…" : "→"}
-</button>
-          </div>
+    <input
+      value={address}
+      onChange={(e) => setAddress(e.target.value)}
+      placeholder="Search a neighborhood or address"
+      className="min-w-0 flex-1 bg-transparent text-sm font-medium text-[#172341] outline-none placeholder:text-[#97a4b8]"
+    />
+  </div>
+
+  <button
+    onClick={searchLocation}
+    disabled={searching}
+    className="flex h-12 shrink-0 items-center justify-center rounded-xl bg-[#1769ff] px-5 text-sm font-semibold text-white transition hover:bg-[#0f5de8] disabled:opacity-50"
+  >
+    {searching ? "Searching..." : "Analyze"}
+  </button>
+</div>
 {analysisError && (
   <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
     {analysisError}
@@ -605,49 +641,65 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
         </aside>
 
         {/* CENTER MAP */}
-        <div className="relative min-h-[520px] overflow-hidden xl:min-h-[760px]">
-<SpotMap
-  longitude={longitude}
-  latitude={latitude}
-  label={locationLabel}
-  onSearchArea={async (lng, lat, label) => {
-    setLongitude(lng);
-    setLatitude(lat);
-    setLocationLabel(label);
-    setAddress(label);
-    setShowOpportunities(false);
+<div className="relative min-h-[520px] bg-[#eef4fb] p-4 xl:min-h-[760px]">
+  <div className="absolute inset-4 overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-[0_18px_50px_rgba(35,70,120,0.12)]">
+    <SpotMap
+      longitude={longitude}
+      latitude={latitude}
+      label={locationLabel}
+      onSearchArea={async (lng, lat, label) => {
+        setLongitude(lng);
+        setLatitude(lat);
+        setLocationLabel(label);
+        setAddress(label);
+        setShowOpportunities(false);
 
-    await analyzeLocation(lng, lat);
-  }}
-/>
+        await analyzeLocation(lng, lat);
+      }}
+    />
+  </div>
 </div>
         
 
         {/* RIGHT */}
-        <aside className="border-t border-slate-100 bg-[#fbfcfe] px-6 pb-6 pt-2 xl:border-l xl:border-t-0 xl:px-8 xl:pb-8 xl:pt-2">
-          <div className="px-1 py-4">
+        <aside className="border-t border-[#e6edf7] bg-[#f5f9ff] p-4 xl:border-l xl:border-t-0">
+  <div className="h-full rounded-[28px] border border-white bg-white p-6 shadow-[0_18px_50px_rgba(35,70,120,0.08)]">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="font-serif text-[38px] font-semibold leading-tight tracking-tight">
-                  {locationLabel}
-                </h2>
-                <p className="mt-2 leading-6 text-[#65738d]">
-                Search complete. Analyze this location to discover its cultural signals and strongest business opportunities.
-                </p>
+  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1769ff]">
+    <span className="h-2 w-2 rounded-full bg-[#1769ff]" />
+    Location intelligence
+  </div>
+
+  <h2 className="mt-3 text-[36px] font-bold leading-tight tracking-[-0.04em] text-[#0a1535]">
+    {locationLabel}
+  </h2>
+
+  <p className="mt-2 max-w-[340px] text-sm leading-6 text-[#65738d]">
+    Cultural signals, nearby context, and business opportunities for this area.
+  </p>
                 {locationImage && (
-  <div className="mt-5">
+  <div className="mt-5 overflow-hidden rounded-2xl border border-[#e5edf7] bg-[#f8fbff]">
     <img
       src={locationImage}
       alt={imagePlaceName || locationLabel}
-      className="h-40 w-full rounded-xl object-cover"
+      className="h-44 w-full object-cover"
     />
 
-    <div className="mt-2 flex items-center gap-2 text-sm">
-      <span className="text-[#65738d]">Nearby Qloo place</span>
-      <span className="h-1 w-1 rounded-full bg-[#1769ff]" />
-      <span className="font-semibold text-[#172341]">
-        {imagePlaceName || locationLabel}
-      </span>
+    <div className="flex items-center justify-between gap-4 px-4 py-3">
+      <div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8390a6]">
+          Nearby Qloo place
+        </div>
+
+        <div className="mt-1 text-sm font-semibold text-[#172341]">
+          {imagePlaceName || locationLabel}
+        </div>
+      </div>
+
+      <div className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#1769ff]">
+        Qloo
+      </div>
     </div>
   </div>
 )}
@@ -693,16 +745,20 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              {dna.map((item) => (
-  <div
-    key={item.name}
-    className="..."
-  >
-    {item.name}
-  </div>
-))}
-            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+  {dna.slice(0, 8).map((item, index) => (
+    <div
+      key={item.name}
+      className={`rounded-full border px-3 py-2 text-sm font-medium ${
+        index < 3
+          ? "border-[#cfe0ff] bg-[#eef5ff] text-[#1769ff]"
+          : "border-[#e3e9f2] bg-[#f8fafc] text-[#5f6f89]"
+      }`}
+    >
+      {item.name}
+    </div>
+  ))}
+</div>
 <button
   type="button"
   onClick={() => setShowOpportunities(true)}
@@ -711,32 +767,48 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
   View Agent Recommendations
   <span className="text-lg">→</span>
 </button>
-            <div className="mt-6 border-y border-[#dfe5ed] py-5">
-  <div className="flex items-center gap-2">
-    <h3 className="font-semibold text-[#172341]">
-      Cultural Fit Index
+<div className="mt-6">
+  <div className="flex items-center justify-between">
+    <h3 className="text-lg font-bold text-[#172341]">
+      Top opportunities
     </h3>
-    <span className="text-xs text-[#8290a7]">ⓘ</span>
+
+    <span className="text-xs font-medium text-[#8290a7]">
+      Ranked by SpotU
+    </span>
   </div>
 
-  <div className="mt-5 grid grid-cols-[120px_1fr] items-center gap-5">
-    <div className="relative flex h-[120px] w-[120px] items-center justify-center rounded-full bg-[conic-gradient(#347df6_0deg,#347df6_331deg,#e7eefc_331deg)]">
-      <div className="flex h-[96px] w-[96px] flex-col items-center justify-center rounded-full bg-white">
-        <span className="text-4xl font-bold text-[#172341]">
-          {culturalFitIndex ?? "—"}
-        </span>
-        <span className="text-xs text-[#748198]">out of 100</span>
-      </div>
-    </div>
+  <div className="mt-3 space-y-2">
+    {opportunities.slice(0, 3).map((opportunity, index) => (
+      <div
+        key={opportunity.name}
+        className="flex items-center justify-between rounded-2xl border border-[#dce8fa] bg-[linear-gradient(135deg,#ffffff_0%,#f7fbff_100%)] px-4 py-3 shadow-[0_6px_18px_rgba(23,105,255,0.05)]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef5ff] text-xs font-bold text-[#1769ff]">
+            {index + 1}
+          </div>
 
-    <p className="text-base leading-6 text-[#53627d]">
-      Strong and distinct cultural identity, with high affinity for dining,
-      design, shopping and lifestyle experiences.
-    </p>
+          <div>
+            <div className="text-sm font-semibold text-[#172341]">
+              {opportunity.name}
+            </div>
+
+            <div className="mt-0.5 text-xs text-[#8290a7]">
+              Cultural Match {opportunity.culturalMatch}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eef5ff] text-sm font-bold text-[#1769ff]">
+          {opportunity.opportunityScore}
+        </div>
+      </div>
+    ))}
   </div>
 </div>
 
-            
+             
           {showOpportunities && (
   <div className="fixed inset-0 z-40 overflow-y-auto bg-[#f4f7fb] px-6 pb-6 pt-28 lg:px-12 xl:px-24 2xl:px-40">
 <div className="fixed left-0 right-0 top-0 z-50 flex h-20 items-center justify-end border-b border-[#e3e8f0] bg-[#f4f7fb] px-6 lg:px-12 xl:px-24 2xl:px-40">
@@ -897,102 +969,83 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
       </section>
       )}
       {activeTab === "compare" && (
-  <section className="mx-4 mb-4 mt-2 rounded-2xl bg-white p-8 shadow-sm">
+  <section className="mx-4 mb-4 mt-2 rounded-[28px] border border-[#e5edf7] bg-[linear-gradient(135deg,#f7fbff_0%,#eef5ff_100%)] p-8 shadow-[0_12px_40px_rgba(35,70,120,0.06)]">
     <div>
       <div className="text-xs font-semibold uppercase tracking-wide text-[#2f7df6]">
         Compare locations
       </div>
 
-      <h1 className="mt-2 font-serif text-4xl font-semibold text-[#0a1535]">
-        Where does {selectedConcept} fit better?
-      </h1>
+      <h1 className="mt-2 text-[40px] font-bold tracking-[-0.04em] text-[#0a1535]">
+  Compare locations side by side.
+</h1>
+<p className="mt-3 max-w-2xl text-base leading-7 text-[#65738d]">
+  See how the same business concept performs across different neighborhoods.
+  </p>
+  <div className="mt-7 flex max-w-2xl overflow-hidden rounded-2xl border border-[#dbe7ff] bg-white p-1.5 shadow-[0_8px_24px_rgba(23,105,255,0.08)]">
+  <input
+    value={compareAddress}
+    onChange={(e) => setCompareAddress(e.target.value)}
+    placeholder="Search another location to compare"
+    className="min-w-0 flex-1 rounded-xl px-4 py-3 text-sm outline-none placeholder:text-[#97a4b8]"
+  />
 
-      <p className="mt-2 text-sm text-[#65738d]">
-        Compare cultural fit and opportunity signals across two locations.
-      </p>
+  <button
+    onClick={compareLocation}
+    disabled={comparing}
+    className="rounded-xl bg-[#1769ff] px-6 text-sm font-semibold text-white transition hover:bg-[#0f5de8]"
+  >
+    {comparing ? "..." : "Compare"}
+  </button>
+</div>
+<div className="mt-6">
+  <div className="flex items-center justify-between">
+    <div className="text-sm font-semibold text-[#172341]">
+      Choose a concept
     </div>
+  </div>
 
-    <div className="mt-8 grid gap-5 lg:grid-cols-2">
-      {/* LOCATION A */}
-      <div className="self-start rounded-xl border border-[#dfe5ed] p-5">
-        <div className="text-xs font-semibold uppercase tracking-wide text-[#8290a7]">
-          Location A
-        </div>
+  <div className="mt-3 flex flex-wrap gap-2">
+    {concepts.map((concept) => {
+      const selected = concept.label === selectedConcept;
 
-        <div className="mt-2 text-2xl font-bold text-[#172341]">
-          {locationLabel}
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-[#f6f8fb] p-3">
-            <div className="text-xs text-[#8290a7]">
-              Cultural Fit
-            </div>
-            <div className="mt-1 text-xl font-bold text-[#172341]">
-              {culturalFitIndex ?? "—"}
-            </div>
-          </div>
-
-          <div className="rounded-lg bg-[#f6f8fb] p-3">
-            <div className="text-xs text-[#8290a7]">
-              {selectedConcept} Opportunity
-            </div>
-            <div className="mt-1 text-xl font-bold text-[#172341]">
-              {selectedOpportunity?.opportunityScore ?? "—"}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {dna.slice(0, 6).map((item) => (
-            <span
-              key={item.name}
-              className="rounded-full bg-[#f2f6fc] px-3 py-1 text-xs text-[#53627e]"
-            >
-              {item.name}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* LOCATION B */}
-      <div className="rounded-xl border border-[#dfe5ed] p-5">
-        <div className="text-xs font-semibold uppercase tracking-wide text-[#8290a7]">
-          Location B
-        </div>
-
-        <div className="mt-3 flex overflow-hidden rounded-xl border border-[#dfe6f0] bg-white">
-          <input
-            value={compareAddress}
-            onChange={(e) => setCompareAddress(e.target.value)}
-            placeholder="Search another location"
-            className="min-w-0 flex-1 px-4 py-3 text-sm outline-none"
-          />
-
-          <button
-            onClick={compareLocation}
-            disabled={comparing}
-            className="bg-[#2f7df6] px-5 text-sm font-semibold text-white"
-          >
-            {comparing ? "..." : "Compare"}
-          </button>
-        </div>
-
-        {comparisonAnalysis ? (
-          <>
-          {selectedOpportunity && comparisonAnalysis.selectedOpportunity && (
-  <div className="mt-5 rounded-xl border border-[#b9d2ff] bg-[#f8fbff] p-5">
+      return (
+        <button
+          key={concept.label}
+          type="button"
+          onClick={() => setSelectedConcept(concept.label)}
+          className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+            selected
+              ? "border-[#1769ff] bg-[#eef5ff] text-[#1769ff]"
+              : "border-[#e1e7f0] bg-white text-[#5f6f89] hover:border-[#b9d2ff]"
+          }`}
+        >
+          <concept.icon className="h-4 w-4" strokeWidth={1.8} />
+          {concept.label}
+        </button>
+      );
+    })}
+  </div>
+</div>
+    </div>
+  {comparisonAnalysis &&
+  selectedOpportunity &&
+  comparisonAnalysis.selectedOpportunity && (
+  <div className="mx-auto mt-6 max-w-3xl rounded-[24px] border border-[#b9d2ff] bg-[linear-gradient(135deg,#ffffff_0%,#f4f8ff_100%)] px-6 py-5 shadow-[0_10px_30px_rgba(23,105,255,0.08)]">
     <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1769ff]">
       SpotU comparison
     </div>
 
     <div className="mt-2 text-xl font-bold text-[#172341]">
-      Better fit:{" "}
-      {selectedOpportunity.opportunityScore >=
-      comparisonAnalysis.selectedOpportunity.opportunityScore
-        ? locationLabel
-        : comparisonAnalysis.label}
-    </div>
+  {selectedOpportunity.opportunityScore ===
+  comparisonAnalysis.selectedOpportunity.opportunityScore
+    ? `Tie: ${locationLabel} and ${comparisonAnalysis.label}`
+    : `Better fit: ${
+        selectedOpportunity.opportunityScore >
+        comparisonAnalysis.selectedOpportunity.opportunityScore
+          ? locationLabel
+          : comparisonAnalysis.label
+      }`}
+</div>
 
     <p className="mt-2 text-sm leading-6 text-[#65738d]">
   {Math.abs(
@@ -1013,28 +1066,158 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
 </p>
   </div>
 )}
-            <div className="mt-5 text-2xl font-bold text-[#172341]">
-              {comparisonAnalysis.label}
-            </div>
+    <div className="relative mt-8 grid gap-5 lg:grid-cols-2">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#dbe7ff] bg-white text-sm font-bold text-[#1769ff] shadow-[0_8px_24px_rgba(23,105,255,0.12)] lg:flex">
+  VS
+</div>
+      {/* LOCATION A */}
+      <div
+  className={`self-start rounded-[24px] p-6 shadow-[0_12px_30px_rgba(35,70,120,0.08)] ${
+    selectedOpportunity &&
+    comparisonAnalysis?.selectedOpportunity &&
+    selectedOpportunity.opportunityScore >
+      comparisonAnalysis.selectedOpportunity.opportunityScore
+      ? "border border-[#b9d2ff] bg-[linear-gradient(135deg,#ffffff_0%,#f6faff_100%)]"
+      : "border border-white bg-white"
+  }`}
+>
+        <div className="flex items-center justify-between">
+  <div className="text-xs font-semibold uppercase tracking-wide text-[#8290a7]">
+    Location A
+  </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-[#f6f8fb] p-3">
+  {selectedOpportunity &&
+    comparisonAnalysis?.selectedOpportunity &&
+    selectedOpportunity.opportunityScore >
+      comparisonAnalysis.selectedOpportunity.opportunityScore && (
+      <div className="rounded-full bg-[#1769ff] px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+        Best fit
+      </div>
+    )}
+</div>
+
+        <div className="mt-2 flex items-center justify-between gap-4">
+  <div>
+    <div className="text-2xl font-bold text-[#172341]">
+      {locationLabel}
+    </div>
+
+    <div className="mt-1 text-sm text-[#8290a7]">
+      {selectedConcept}
+    </div>
+  </div>
+
+  <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full bg-[#eaf2ff]">
+    <div className="text-2xl font-bold text-[#1769ff]">
+      {selectedOpportunity?.opportunityScore ?? "—"}
+    </div>
+
+    <div className="text-[10px] font-semibold uppercase tracking-wide text-[#8290a7]">
+      Score
+    </div>
+  </div>
+</div>
+
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="rounded-lg bg-[#f6f8fb] p-3">
+            <div className="text-xs text-[#8290a7]">
+              Cultural Fit
+            </div>
+            <div className="mt-2 text-3xl font-bold tracking-tight text-[#172341]">
+  {comparisonAnalysis?.culturalFitIndex ?? "—"}
+</div>
+          </div>
+
+          <div className="rounded-lg bg-[#f6f8fb] p-3">
+            <div className="text-xs text-[#8290a7]">
+              {selectedConcept} Opportunity
+            </div>
+            <div className="mt-2 text-3xl font-bold tracking-tight text-[#1769ff]">
+  {selectedOpportunity?.opportunityScore ?? "—"}
+</div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {dna.slice(0, 6).map((item) => (
+            <span
+              key={item.name}
+              className="rounded-full bg-[#f2f6fc] px-3 py-1 text-xs text-[#53627e]"
+            >
+              {item.name}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* LOCATION B */}
+      <div
+  className={`rounded-[24px] p-6 shadow-[0_12px_30px_rgba(35,70,120,0.08)] ${
+    selectedOpportunity &&
+    comparisonAnalysis?.selectedOpportunity &&
+    comparisonAnalysis.selectedOpportunity.opportunityScore >
+      selectedOpportunity.opportunityScore
+      ? "border border-[#b9d2ff] bg-[linear-gradient(135deg,#ffffff_0%,#f6faff_100%)]"
+      : "border border-white bg-white"
+  }`}
+>
+        <div className="flex items-center justify-between">
+  <div className="text-xs font-semibold uppercase tracking-wide text-[#8290a7]">
+    Location B
+  </div>
+
+  {selectedOpportunity &&
+    comparisonAnalysis?.selectedOpportunity &&
+    comparisonAnalysis.selectedOpportunity.opportunityScore >
+      selectedOpportunity.opportunityScore && (
+      <div className="rounded-full bg-[#1769ff] px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+        Best fit
+      </div>
+    )}
+</div>
+
+        {comparisonAnalysis ? (
+          <>
+          
+            <div className="mt-5 flex items-center justify-between gap-4">
+  <div>
+    <div className="text-2xl font-bold text-[#172341]">
+      {comparisonAnalysis.label}
+    </div>
+
+    <div className="mt-1 text-sm text-[#8290a7]">
+      {selectedConcept}
+    </div>
+  </div>
+
+  <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full bg-[#eaf2ff]">
+    <div className="text-2xl font-bold text-[#1769ff]">
+      {comparisonAnalysis.selectedOpportunity?.opportunityScore ?? "—"}
+    </div>
+
+    <div className="text-[10px] font-semibold uppercase tracking-wide text-[#8290a7]">
+      Score
+    </div>
+  </div>
+</div>
+
+            <div className="mt-5 grid grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-[#dce8fa] bg-[#f7fbff] p-4">
                 <div className="text-xs text-[#8290a7]">
                   Cultural Fit
                 </div>
-                <div className="mt-1 text-xl font-bold text-[#172341]">
-                  {comparisonAnalysis.culturalFitIndex ?? "—"}
-                </div>
+                <div className="mt-2 text-3xl font-bold tracking-tight text-[#172341]">
+  {culturalFitIndex ?? "—"}
+</div>
               </div>
 
               <div className="rounded-lg bg-[#f6f8fb] p-3">
                 <div className="text-xs text-[#8290a7]">
                   {selectedConcept} Opportunity
                 </div>
-                <div className="mt-1 text-xl font-bold text-[#172341]">
-                  {comparisonAnalysis.selectedOpportunity?.opportunityScore ??
-                    "—"}
-                </div>
+                <div className="mt-2 text-3xl font-bold tracking-tight text-[#1769ff]">
+  {comparisonAnalysis.selectedOpportunity?.opportunityScore ?? "—"}
+</div>
               </div>
             </div>
 
@@ -1061,7 +1244,7 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
   </section>
 )}
 {activeTab === "saved" && (
-  <section className="mx-4 mb-4 mt-2 rounded-2xl bg-white p-8 shadow-sm">
+  <section className="mx-4 mb-4 mt-2 rounded-[28px] border border-[#e5edf7] bg-[linear-gradient(135deg,#f7fbff_0%,#eef5ff_100%)] p-8 shadow-[0_12px_40px_rgba(35,70,120,0.06)]">
     <div>
       <div className="text-xs font-semibold uppercase tracking-wide text-[#2f7df6]">
         Saved analyses
@@ -1081,64 +1264,117 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
         No saved analyses yet. Use the ♡ button on an analysis to save one.
       </div>
     ) : (
-      <div className="mt-8 grid gap-4">
+      <div className="mt-8 grid gap-5 md:grid-cols-2">
         {savedAnalyses.map((saved) => (
           <div
             key={saved.id}
-            className="rounded-xl border border-[#dfe5ed] p-5"
+            className="rounded-[24px] border border-white bg-white p-5 shadow-[0_12px_30px_rgba(35,70,120,0.08)]"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wide text-[#8290a7]">
-                  {saved.selectedConcept}
-                </div>
+            {saved.locationImage && (
+  <div className="mb-5 overflow-hidden rounded-2xl">
+    <img
+      src={saved.locationImage}
+      alt={saved.imagePlaceName || saved.label}
+      className="h-44 w-full object-cover"
+    />
+  </div>
+)}
+            <div className="flex items-start justify-between gap-5">
+  <div>
+    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1769ff]">
+      {saved.selectedConcept}
+    </div>
 
-                <div className="mt-1 text-2xl font-bold text-[#172341]">
-                  {saved.label}
-                </div>
-              </div>
+    <div className="mt-1 text-2xl font-bold tracking-tight text-[#172341]">
+      {saved.label}
+    </div>
 
-              <div className="text-right">
-                <div className="text-xs text-[#8290a7]">
-                  Opportunity Score
-                </div>
+    {saved.imagePlaceName && (
+      <div className="mt-1 text-xs text-[#8290a7]">
+        Nearby Qloo place · {saved.imagePlaceName}
+      </div>
+    )}
+  </div>
 
-                <div className="mt-1 text-2xl font-bold text-[#172341]">
-                  {saved.selectedOpportunity?.opportunityScore ?? "—"}
-                </div>
-              </div>
-            </div>
+  <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full bg-[#eaf2ff]">
+    <div className="text-2xl font-bold text-[#1769ff]">
+      {saved.selectedOpportunity?.opportunityScore ?? "—"}
+    </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-[#f6f8fb] p-3">
-                <div className="text-xs text-[#8290a7]">
-                  Cultural Fit
-                </div>
-                <div className="mt-1 font-bold text-[#172341]">
-                  {saved.culturalFitIndex ?? "—"}
-                </div>
-              </div>
+    <div className="text-[10px] font-semibold uppercase tracking-wide text-[#8290a7]">
+      Score
+    </div>
+  </div>
+</div>
 
-              <div className="rounded-lg bg-[#f6f8fb] p-3">
-                <div className="text-xs text-[#8290a7]">
-                  Market Gap Signal
-                </div>
-                <div className="mt-1 font-bold text-[#172341]">
-                  {saved.selectedOpportunity?.whiteSpace ?? "—"}
-                </div>
-              </div>
-            </div>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+  <div className="rounded-2xl border border-[#dce8fa] bg-[#f7fbff] p-4">
+    <div className="text-xs font-medium text-[#72819a]">
+      Cultural Fit
+    </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {saved.neighborhoodDna.slice(0, 6).map((item) => (
-                <span
-                  key={item.name}
-                  className="rounded-full bg-[#f2f6fc] px-3 py-1 text-xs text-[#53627e]"
-                >
-                  {item.name}
-                </span>
-              ))}
-            </div>
+    <div className="mt-2 text-2xl font-bold tracking-tight text-[#172341]">
+      {saved.culturalFitIndex ?? "—"}
+    </div>
+  </div>
+
+  <div className="rounded-2xl border border-[#dce8fa] bg-[#f7fbff] p-4">
+    <div className="text-xs font-medium text-[#72819a]">
+      Market Gap
+    </div>
+
+    <div className="mt-2 text-2xl font-bold tracking-tight text-[#1769ff]">
+      {saved.selectedOpportunity?.whiteSpace ?? "—"}
+    </div>
+  </div>
+</div>
+
+            <div className="mt-5">
+  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8290a7]">
+    Strongest signals
+  </div>
+
+  <div className="mt-3 flex flex-wrap gap-2">
+    {saved.neighborhoodDna.slice(0, 6).map((item, index) => (
+      <span
+        key={item.name}
+        className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+          index < 3
+            ? "border-[#cfe0ff] bg-[#eef5ff] text-[#1769ff]"
+            : "border-[#e3e9f2] bg-[#f8fafc] text-[#5f6f89]"
+        }`}
+      >
+        {item.name}
+      </span>
+    ))}
+  </div>
+</div>
+<div className="mt-5 flex items-center justify-between border-t border-[#edf1f6] pt-4">
+  <button
+    type="button"
+    onClick={() => removeSavedAnalysis(saved.id)}
+    className="flex items-center gap-2 text-xs font-semibold text-[#ef4444] transition hover:text-[#dc2626]"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4 fill-[#ef4444] text-[#ef4444]"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"
+      />
+    </svg>
+
+    Unsave
+  </button>
+
+  <div className="text-xs text-[#97a4b8]">
+    {new Date(saved.savedAt).toLocaleDateString()}
+  </div>
+</div>
           </div>
         ))}
       </div>
@@ -1146,7 +1382,7 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
   </section>
 )}
 {activeTab === "about" && (
-  <section className="mx-4 mb-4 mt-2 rounded-2xl bg-white px-6 py-10 shadow-sm md:px-10">
+  <section className="mx-4 mb-4 mt-2 rounded-[28px] border border-[#e5edf7] bg-[linear-gradient(135deg,#f7fbff_0%,#eef5ff_100%)] px-6 py-10 shadow-[0_12px_40px_rgba(35,70,120,0.06)] md:px-10">
     <div className="mx-auto max-w-5xl">
       <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1769ff]">
         About SpotU
@@ -1162,57 +1398,206 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
         powered by Qloo.
       </p>
 
-      <div className="mt-10 grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-[#e3e8f0] bg-[#f8fafc] p-6">
-          <div className="text-sm font-bold text-[#172341]">
-            Cultural Fit Index
-          </div>
-          <p className="mt-3 text-sm leading-6 text-[#65738d]">
-            Measures how strongly the overall cultural identity of a location
-            stands out based on nearby Qloo signals.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[#e3e8f0] bg-[#f8fafc] p-6">
-          <div className="text-sm font-bold text-[#172341]">
-            Cultural Match
-          </div>
-          <p className="mt-3 text-sm leading-6 text-[#65738d]">
-            Shows how closely a selected business concept aligns with the
-            cultural characteristics of that location.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[#e3e8f0] bg-[#f8fafc] p-6">
-          <div className="text-sm font-bold text-[#172341]">
-            Market Gap Signal
-          </div>
-          <p className="mt-3 text-sm leading-6 text-[#65738d]">
-            Indicates relative underrepresentation of a concept among nearby
-            places. A higher signal can suggest more room in the local market.
-          </p>
-        </div>
+      <div className="mt-10 grid gap-5 md:grid-cols-3">
+  {/* CULTURAL FIT */}
+  <div className="group rounded-[24px] border border-white bg-white p-6 shadow-[0_12px_30px_rgba(35,70,120,0.07)]">
+    <div className="flex items-start justify-between">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#1769ff]">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"
+          />
+        </svg>
       </div>
 
-      <div className="mt-10 rounded-2xl border border-[#dbe7ff] bg-[#f4f8ff] p-7">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1769ff]">
-              Powered by Qloo
-            </div>
+      <span className="text-xs font-bold tracking-[0.15em] text-[#b0bbca]">
+        01
+      </span>
+    </div>
 
-            <h2 className="mt-2 text-xl font-bold text-[#172341]">
-              Cultural intelligence, not just location data.
-            </h2>
+    <h3 className="mt-6 text-xl font-bold text-[#172341]">
+      Cultural Fit Index
+    </h3>
 
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-[#65738d]">
-              SpotU uses Qloo-powered cultural signals to understand the
-              character of an area, compare concepts, and rank potential
-              opportunities.
-            </p>
-          </div>
-        </div>
+    <p className="mt-2 text-sm leading-6 text-[#65738d]">
+      Measures how strongly the overall cultural identity of a location stands
+      out based on nearby Qloo signals.
+    </p>
+
+    <div className="mt-6 flex items-end gap-1">
+      <div className="h-3 w-3 rounded-sm bg-[#dce8ff]" />
+      <div className="h-5 w-3 rounded-sm bg-[#c7dbff]" />
+      <div className="h-7 w-3 rounded-sm bg-[#9fc1ff]" />
+      <div className="h-9 w-3 rounded-sm bg-[#6d9fff]" />
+      <div className="h-11 w-3 rounded-sm bg-[#1769ff]" />
+    </div>
+  </div>
+
+  {/* CULTURAL MATCH */}
+  <div className="group rounded-[24px] border border-white bg-white p-6 shadow-[0_12px_30px_rgba(35,70,120,0.07)]">
+    <div className="flex items-start justify-between">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#1769ff]">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+        >
+          <circle cx="12" cy="12" r="8" />
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="12" cy="12" r="1" fill="currentColor" />
+        </svg>
       </div>
+
+      <span className="text-xs font-bold tracking-[0.15em] text-[#b0bbca]">
+        02
+      </span>
+    </div>
+
+    <h3 className="mt-6 text-xl font-bold text-[#172341]">
+      Cultural Match
+    </h3>
+
+    <p className="mt-2 text-sm leading-6 text-[#65738d]">
+      Shows how closely a selected business concept aligns with the cultural
+      characteristics of that location.
+    </p>
+
+    <div className="mt-7">
+      <div className="h-2 overflow-hidden rounded-full bg-[#edf2f8]">
+        <div className="h-full w-4/5 rounded-full bg-[#1769ff]" />
+      </div>
+
+      <div className="mt-2 flex justify-between text-[10px] font-semibold uppercase tracking-wide text-[#9aa6b8]">
+        <span>Low match</span>
+        <span>Strong match</span>
+      </div>
+    </div>
+  </div>
+
+  {/* MARKET GAP */}
+  <div className="group rounded-[24px] border border-white bg-white p-6 shadow-[0_12px_30px_rgba(35,70,120,0.07)]">
+    <div className="flex items-start justify-between">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#1769ff]">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 18V9m5 9V5m5 13v-7m5 7V3"
+          />
+        </svg>
+      </div>
+
+      <span className="text-xs font-bold tracking-[0.15em] text-[#b0bbca]">
+        03
+      </span>
+    </div>
+
+    <h3 className="mt-6 text-xl font-bold text-[#172341]">
+      Market Gap Signal
+    </h3>
+
+    <p className="mt-2 text-sm leading-6 text-[#65738d]">
+      Shows relative underrepresentation of a concept among nearby places,
+      helping SpotU identify where more room may exist.
+    </p>
+
+    <div className="mt-6 grid grid-cols-5 gap-2">
+      <div className="h-10 rounded-lg bg-[#dce8ff]" />
+      <div className="h-10 rounded-lg bg-[#dce8ff]" />
+      <div className="h-10 rounded-lg border-2 border-dashed border-[#9fc1ff] bg-white" />
+      <div className="h-10 rounded-lg bg-[#dce8ff]" />
+      <div className="h-10 rounded-lg bg-[#dce8ff]" />
+    </div>
+
+    <div className="mt-2 text-center text-[10px] font-semibold uppercase tracking-wide text-[#1769ff]">
+      Relative gap
+    </div>
+  </div>
+</div>
+
+      <div className="mt-10 rounded-[28px] border border-[#dbe7ff] bg-white p-7 shadow-[0_12px_30px_rgba(35,70,120,0.07)]">
+  <div className="flex items-center justify-between gap-4">
+    <div>
+      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1769ff]">
+        Powered by Qloo
+      </div>
+
+      <h3 className="mt-2 text-2xl font-bold tracking-tight text-[#172341]">
+        From location to recommendation.
+      </h3>
+
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#65738d]">
+        SpotU turns Qloo cultural signals into a clear business opportunity decision.
+      </p>
+    </div>
+  </div>
+
+  <div className="mt-7 grid gap-4 md:grid-cols-4">
+    <div className="rounded-2xl bg-[#f7fbff] p-5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf2ff] text-sm font-bold text-[#1769ff]">
+        1
+      </div>
+      <div className="mt-4 text-sm font-bold text-[#172341]">
+        Choose a location
+      </div>
+      <div className="mt-1 text-xs leading-5 text-[#8290a7]">
+        Search a neighborhood, city, or place.
+      </div>
+    </div>
+
+    <div className="rounded-2xl bg-[#f7fbff] p-5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf2ff] text-sm font-bold text-[#1769ff]">
+        2
+      </div>
+      <div className="mt-4 text-sm font-bold text-[#172341]">
+        Read Qloo signals
+      </div>
+      <div className="mt-1 text-xs leading-5 text-[#8290a7]">
+        Nearby places reveal the area&apos;s cultural identity.
+      </div>
+    </div>
+
+    <div className="rounded-2xl bg-[#f7fbff] p-5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf2ff] text-sm font-bold text-[#1769ff]">
+        3
+      </div>
+      <div className="mt-4 text-sm font-bold text-[#172341]">
+        Score concepts
+      </div>
+      <div className="mt-1 text-xs leading-5 text-[#8290a7]">
+        SpotU compares cultural match and market gap.
+      </div>
+    </div>
+
+    <div className="rounded-2xl bg-[#f7fbff] p-5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1769ff] text-sm font-bold text-white">
+        4
+      </div>
+      <div className="mt-4 text-sm font-bold text-[#172341]">
+        Recommend what fits
+      </div>
+      <div className="mt-1 text-xs leading-5 text-[#8290a7]">
+        Concepts are ranked with supporting signals.
+      </div>
+    </div>
+  </div>
+</div>
 
       <p className="mt-6 text-xs leading-5 text-[#8290a7]">
         Market Gap Signal represents relative underrepresentation in SpotU's
