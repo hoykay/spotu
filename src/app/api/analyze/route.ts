@@ -240,6 +240,68 @@ const opportunities = conceptProfiles
   opportunities.find(
     (opportunity) => opportunity.name === selectedConcept
   ) ?? null;
+
+  type QlooPlace = {
+  name?: string;
+  location?: {
+    lat?: number;
+    lon?: number;
+  };
+  properties?: {
+    image?: {
+      url?: string;
+    };
+    images?: Array<{
+      url?: string;
+    }>;
+  };
+};
+
+type PhotographedPlace = QlooPlace & {
+  location: {
+    lat: number;
+    lon: number;
+  };
+};
+
+  const photographedPlaces = (entities as QlooPlace[]).filter(
+  (entity): entity is PhotographedPlace => {
+  const imageUrl =
+    entity?.properties?.image?.url ||
+    entity?.properties?.images?.[0]?.url;
+
+  return (
+    Boolean(imageUrl) &&
+    typeof entity?.location?.lat === "number" &&
+    typeof entity?.location?.lon === "number"
+  );
+});
+
+const nearestPhotoPlace =
+  photographedPlaces.reduce<PhotographedPlace | null>(
+  (nearest, entity) => {
+    if (!nearest) return entity;
+
+    const entityDistance =
+      Math.pow(entity.location.lat - latitude, 2) +
+      Math.pow(entity.location.lon - longitude, 2);
+
+    const nearestDistance =
+      Math.pow(nearest.location.lat - latitude, 2) +
+      Math.pow(nearest.location.lon - longitude, 2);
+
+    return entityDistance < nearestDistance ? entity : nearest;
+  },
+  null
+);
+
+const locationImage =
+  nearestPhotoPlace?.properties?.image?.url ||
+  nearestPhotoPlace?.properties?.images?.[0]?.url ||
+  null;
+
+const imagePlaceName = nearestPhotoPlace?.name || null;
+
   return NextResponse.json({
   success: true,
   placeCount: entities.length,
@@ -247,6 +309,8 @@ const opportunities = conceptProfiles
   culturalFitIndex,
   opportunities,
   selectedOpportunity,
+  locationImage,
+imagePlaceName,
 });
   } catch (error) {
     console.error("SpotU analyze error:", error);

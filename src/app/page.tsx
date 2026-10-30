@@ -2,16 +2,26 @@
 
 import { useEffect, useState } from "react";
 import SpotMap from "@/components/SpotMap";
+import {
+  Utensils,
+  Coffee,
+  Wine,
+  ShoppingBag,
+  HeartPulse,
+  Music2,
+  Palette,
+  Sparkles,
+} from "lucide-react";
 
 const concepts = [
-  { icon: "🍴", label: "Restaurant" },
-  { icon: "☕", label: "Café" },
-  { icon: "🍷", label: "Bar / Wine" },
-  { icon: "🛍", label: "Retail" },
-  { icon: "◒", label: "Wellness" },
-  { icon: "♫", label: "Entertainment" },
-  { icon: "▧", label: "Art & Culture" },
-  { icon: "✦", label: "Lifestyle" },
+  { icon: Utensils, label: "Restaurant" },
+  { icon: Coffee, label: "Café" },
+  { icon: Wine, label: "Bar / Wine" },
+  { icon: ShoppingBag, label: "Retail" },
+  { icon: HeartPulse, label: "Wellness" },
+  { icon: Music2, label: "Entertainment" },
+  { icon: Palette, label: "Art & Culture" },
+  { icon: Sparkles, label: "Lifestyle" },
 ];
 
 type DnaItem = {
@@ -64,6 +74,8 @@ const [analysisError, setAnalysisError] = useState<string | null>(null);
 const [activeTab, setActiveTab] =
   useState<"analyze" | "compare" | "saved" | "about">("analyze");
 const [locationLabel, setLocationLabel] = useState("SoHo");
+const [locationImage, setLocationImage] = useState<string | null>(null);
+const [imagePlaceName, setImagePlaceName] = useState<string | null>(null);
 const [searching, setSearching] = useState(false);
 const [comparisonAnalysis, setComparisonAnalysis] =
   useState<ComparisonAnalysis | null>(null);
@@ -122,6 +134,9 @@ if (
   return;
 }
 setAnalysisError(null);
+
+setLocationImage(data.locationImage ?? null);
+setImagePlaceName(data.imagePlaceName ?? null);
 
     setDna(
       Array.isArray(data?.neighborhoodDna)
@@ -399,13 +414,29 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
     <main className="min-h-screen bg-[#f4f7fb] text-[#0b1739]">
       {/* Header */}
       <header className="mx-4 mt-3 flex h-[64px] items-center justify-between rounded-2xl border border-slate-100 bg-white px-8 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111827] text-lg font-bold text-white">
-            S
-          </div>
-          <span className="text-xl font-bold tracking-tight">SpotU</span>
-        </div>
+        <div className="flex items-center gap-2.5">
+  <div className="relative flex h-9 w-8 items-center justify-center">
+    <svg
+      viewBox="0 0 32 40"
+      className="h-9 w-8"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M16 1C8.82 1 3 6.82 3 14c0 9.5 13 24 13 24s13-14.5 13-24C29 6.82 23.18 1 16 1Z"
+        fill="#1769FF"
+      />
+      <path
+        d="M16 8.5l1.8 4.1 4.2 1.9-4.2 1.8L16 20.5l-1.8-4.2-4.2-1.8 4.2-1.9L16 8.5Z"
+        fill="white"
+      />
+    </svg>
+  </div>
 
+  <span className="text-[22px] font-semibold tracking-[-0.035em] text-[#0a1535]">
+    SpotU
+  </span>
+</div>
         <nav className="flex items-center gap-10 text-sm font-medium text-[#52617c]">
           <button
   onClick={() => setActiveTab("analyze")}
@@ -479,14 +510,18 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
         {/* LEFT */}
         <aside className="border-b border-slate-100 p-6 xl:border-b-0 xl:border-r xl:p-8">
 
-          <h1 className="max-w-[260px] font-serif text-[48px] font-semibold leading-[0.98] tracking-tight text-[#0a1535]">
-            What belongs here?
-          </h1>
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1769ff]">
+  Qloo-powered Opportunity Agent
+</div>
 
-          <p className="mt-5 max-w-[285px] text-[17px] leading-7 text-[#53627e]">
-            Find the strongest business opportunity for any space using cultural
-            intelligence from Qloo.
-          </p>
+<h1 className="mt-3 max-w-[260px] font-serif text-[48px] font-semibold leading-[0.98] tracking-tight text-[#0a1535]">
+  What belongs here?
+</h1>
+
+<p className="mt-5 max-w-[300px] text-[17px] leading-7 text-[#53627e]">
+  Enter any location. SpotU reads its cultural signals, evaluates business
+  concepts, and ranks what fits best using Qloo.
+</p>
 
           {/* Location */}
           <div className="mt-7 flex overflow-hidden rounded-xl border border-[#dfe6f0] bg-white shadow-sm">
@@ -517,7 +552,11 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
           {/* Examples */}
           <div className="mt-3 space-y-3">
             <button className="flex w-full items-center gap-4 rounded-xl border border-[#e1e6ee] bg-white p-3 text-left transition hover:border-[#abcaff] hover:shadow-sm">
-              <div className="h-[62px] w-[82px] rounded-lg bg-gradient-to-br from-[#e6c8ad] via-[#f2dbc7] to-[#b47d58]" />
+              <img
+  src="https://images.qloo.com/i/FCE8B172-4795-43E4-B222-3B550DC05FD9-420x-auto.jpg"
+  alt="SoHo"
+  className="h-[62px] w-[82px] shrink-0 rounded-lg object-cover"
+/>
               <div className="flex-1">
                 <p className="font-semibold">SoHo</p>
                 <p className="mt-1 text-sm text-[#667590]">New York, NY</p>
@@ -526,7 +565,11 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
             </button>
 
             <button className="flex w-full items-center gap-4 rounded-xl border border-[#e1e6ee] bg-white p-3 text-left transition hover:border-[#abcaff] hover:shadow-sm">
-              <div className="h-[62px] w-[82px] rounded-lg bg-gradient-to-br from-[#c7775d] via-[#e8b08e] to-[#726b61]" />
+              <img
+  src="https://images.qloo.com/i/0C9F87C9-6DF4-462E-B527-E2C53D2CC6D0-420x-auto.jpg"
+  alt="Lower East Side – Beauty & Essex"
+  className="h-[62px] w-[82px] rounded-lg object-cover"
+/>
               <div className="flex-1">
                 <p className="font-semibold">Lower East Side</p>
                 <p className="mt-1 text-sm text-[#667590]">New York, NY</p>
@@ -553,7 +596,7 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
                       : "border-[#e2e7ef] bg-white text-[#31415f] hover:border-[#b9c9df]"
                   }`}
                 >
-                  <span>{concept.icon}</span>
+                  <concept.icon className="h-4 w-4 shrink-0" strokeWidth={1.8} />
                   <span>{concept.label}</span>
                 </button>
               );
@@ -581,8 +624,8 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
         
 
         {/* RIGHT */}
-        <aside className="border-t border-slate-100 bg-[#fbfcfe] p-6 xl:border-l xl:border-t-0 xl:p-8">
-          <div className="rounded-2xl border border-[#e7ebf2] bg-white p-6 shadow-sm">
+        <aside className="border-t border-slate-100 bg-[#fbfcfe] px-6 pb-6 pt-2 xl:border-l xl:border-t-0 xl:px-8 xl:pb-8 xl:pt-2">
+          <div className="px-1 py-4">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="font-serif text-[38px] font-semibold leading-tight tracking-tight">
@@ -591,6 +634,23 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
                 <p className="mt-2 leading-6 text-[#65738d]">
                 Search complete. Analyze this location to discover its cultural signals and strongest business opportunities.
                 </p>
+                {locationImage && (
+  <div className="mt-5">
+    <img
+      src={locationImage}
+      alt={imagePlaceName || locationLabel}
+      className="h-40 w-full rounded-xl object-cover"
+    />
+
+    <div className="mt-2 flex items-center gap-2 text-sm">
+      <span className="text-[#65738d]">Nearby Qloo place</span>
+      <span className="h-1 w-1 rounded-full bg-[#1769ff]" />
+      <span className="font-semibold text-[#172341]">
+        {imagePlaceName || locationLabel}
+      </span>
+    </div>
+  </div>
+)}
               </div>
 
               <button
@@ -608,7 +668,19 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
     backgroundColor: isCurrentAnalysisSaved ? "#fef2f2" : "#ffffff",
   }}
 >
-  {isCurrentAnalysisSaved ? "♥" : "♡"}
+  <svg
+  viewBox="0 0 24 24"
+  className="h-5 w-5"
+  fill={isCurrentAnalysisSaved ? "currentColor" : "none"}
+  stroke="currentColor"
+  strokeWidth={2}
+>
+  <path
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"
+  />
+</svg>
 </button>
             </div>
 
@@ -631,81 +703,40 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
   </div>
 ))}
             </div>
-
-            <div className="mt-6 rounded-xl border border-[#e3e8f0] p-5">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold">Cultural Fit Index</h3>
-                <span className="text-xs text-[#8290a7]">ⓘ</span>
-              </div>
-
-              <div className="mt-5 grid grid-cols-[135px_1fr] items-center gap-5">
-                <div className="relative flex h-[128px] w-[128px] items-center justify-center rounded-full bg-[conic-gradient(#347df6_0deg,#347df6_331deg,#dbe8ff_331deg)]">
-                  <div className="flex h-[104px] w-[104px] flex-col items-center justify-center rounded-full bg-white">
-                    <span className="text-4xl font-bold">{culturalFitIndex ?? "—"}</span>
-                    <span className="text-xs text-[#748198]">out of 100</span>
-                  </div>
-                </div>
-
-                <p className="border-l border-[#dfe5ed] pl-5 text-sm leading-6 text-[#53627d]">
-                  Strong and distinct cultural identity, with high affinity for
-                  dining, design, shopping and lifestyle experiences.
-                </p>
-              </div>
-            </div>
-
-            <button
+<button
   type="button"
   onClick={() => setShowOpportunities(true)}
   className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#1769ff] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0f5ce0] active:scale-[0.99]"
 >
-  Analyze opportunities
+  View Agent Recommendations
   <span className="text-lg">→</span>
 </button>
-          {selectedOpportunity && (
-  <div className="mt-4 rounded-xl border border-[#dbe7ff] bg-[#f7faff] p-4">
-    <div className="text-xs font-semibold uppercase tracking-wide text-[#2f7df6]">
-      Your selected concept
-    </div>
-
-    <div className="mt-2 flex items-start justify-between gap-3">
-      <div>
-        <div className="text-lg font-bold text-[#172341]">
-          {selectedOpportunity.name}
-        </div>
-
-        <div className="mt-1 text-xs text-[#65738d]">
-          How this idea fits the selected location
-        </div>
-      </div>
-
-      <div className="text-right">
-        <div className="text-3xl font-bold text-[#172341]">
-          {selectedOpportunity.opportunityScore}
-        </div>
-
-        <div className="text-[10px] text-[#8290a7]">
-          opportunity score
-        </div>
-      </div>
-    </div>
-
-    <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-      <div className="rounded-lg bg-white p-3">
-        <div className="text-[#8290a7]">Cultural Match</div>
-        <div className="mt-1 font-bold text-[#172341]">
-          {selectedOpportunity.culturalMatch}
-        </div>
-      </div>
-
-      <div className="rounded-lg bg-white p-3">
-        <div className="text-[#8290a7]">Market Gap Signal</div>
-        <div className="mt-1 font-bold text-[#172341]">
-          {selectedOpportunity.whiteSpace}
-        </div>
-      </div>
-    </div>
+            <div className="mt-6 border-y border-[#dfe5ed] py-5">
+  <div className="flex items-center gap-2">
+    <h3 className="font-semibold text-[#172341]">
+      Cultural Fit Index
+    </h3>
+    <span className="text-xs text-[#8290a7]">ⓘ</span>
   </div>
-)}
+
+  <div className="mt-5 grid grid-cols-[120px_1fr] items-center gap-5">
+    <div className="relative flex h-[120px] w-[120px] items-center justify-center rounded-full bg-[conic-gradient(#347df6_0deg,#347df6_331deg,#e7eefc_331deg)]">
+      <div className="flex h-[96px] w-[96px] flex-col items-center justify-center rounded-full bg-white">
+        <span className="text-4xl font-bold text-[#172341]">
+          {culturalFitIndex ?? "—"}
+        </span>
+        <span className="text-xs text-[#748198]">out of 100</span>
+      </div>
+    </div>
+
+    <p className="text-base leading-6 text-[#53627d]">
+      Strong and distinct cultural identity, with high affinity for dining,
+      design, shopping and lifestyle experiences.
+    </p>
+  </div>
+</div>
+
+            
           {showOpportunities && (
   <div className="fixed inset-0 z-40 overflow-y-auto bg-[#f4f7fb] px-6 pb-6 pt-28 lg:px-12 xl:px-24 2xl:px-40">
 <div className="fixed left-0 right-0 top-0 z-50 flex h-20 items-center justify-end border-b border-[#e3e8f0] bg-[#f4f7fb] px-6 lg:px-12 xl:px-24 2xl:px-40">
@@ -746,57 +777,71 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
     {opportunities.slice(0, 3).map((opportunity, index) => (
       <div
         key={opportunity.name}
-        className="rounded-xl border border-[#e3e8f0] bg-white p-4"
+        className={`rounded-xl border p-4 transition ${
+  index === 0
+    ? "border-[#b9d2ff] bg-[#f8fbff] shadow-[0_10px_30px_rgba(23,105,255,0.08)]"
+    : "border-[#e3e8f0] bg-white"
+}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-xs font-semibold text-[#2f7df6]">
-              #{index + 1}
-            </div>
+  {index === 0 ? "SpotU recommendation" : `#${index + 1}`}
+</div>
 
-            <div className="mt-1 text-base font-bold text-[#172341]">
+            <div className="mt-1 text-xl font-bold text-[#172341]">
               {opportunity.name}
             </div>
           </div>
 
           <div className="text-right">
-            <div className="text-2xl font-bold text-[#172341]">
+            <div className="text-3xl font-bold text-[#172341]">
               {opportunity.opportunityScore}
             </div>
 
-            <div className="text-[10px] text-[#8290a7]">
+            <div className="text-xs text-[#8290a7]">
               opportunity score
             </div>
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-lg bg-[#f6f8fb] p-3">
-            <div className="text-[#8290a7]">Cultural Match</div>
-            <div className="mt-1 font-bold text-[#172341]">
-              {opportunity.culturalMatch}
-            </div>
-          </div>
+        <div className="mt-5 grid grid-cols-2 gap-3 text-base">
+          <div className="rounded-lg bg-[#f6f8fb] p-4">
+  <div className="text-sm text-[#8290a7]">Cultural Match</div>
+  <div className="mt-2 text-lg font-bold text-[#172341]">
+    {opportunity.culturalMatch}
+  </div>
+</div>
 
-          <div className="rounded-lg bg-[#f6f8fb] p-3">
+          <div className="rounded-lg bg-[#f6f8fb] p-4">
             <div className="text-[#8290a7]">Market Gap Signal</div>
-            <div className="mt-1 font-bold text-[#172341]">
+            <div className="mt-2 font-bold text-[#172341]">
               {opportunity.whiteSpace}
             </div>
           </div>
         </div>
 
         {opportunity.strongestSignals.length > 0 && (
-          <div className="mt-3 text-xs text-[#65738d]">
-            Strongest signals:{" "}
-            {opportunity.strongestSignals
-              .map((signal) => signal.name)
-              .join(" · ")}
-          </div>
+          <div className="mt-4">
+  <div className="text-sm font-semibold text-[#65738d]">
+    Strongest signals
+  </div>
+
+  <div className="mt-2 flex flex-wrap gap-2">
+    {opportunity.strongestSignals.map((signal) => (
+      <span
+        key={signal.name}
+        className="rounded-full border border-[#dbe7ff] bg-[#f4f8ff] px-3 py-1.5 text-sm font-medium text-[#1769ff]"
+      >
+        {signal.name}
+      </span>
+    ))}
+  </div>
+</div>
         )}
-        <div className="mt-3 rounded-lg bg-[#f8fafc] p-3 text-xs leading-5 text-[#65738d]">
+        <div className="mt-3 rounded-lg bg-[#f8fafc] p-3 text-sm leading-5 text-[#65738d]">
   <span className="font-semibold text-[#172341]">
-    Why it fits:
+    {index === 0 ? "Why SpotU recommends this:" : "Why it fits:"}
   </span>{" "}
   Strong{" "}
   {opportunity.strongestSignals
@@ -806,6 +851,38 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
   signals suggest strong cultural alignment, while a Market Gap Signal of{" "}
   {opportunity.whiteSpace} indicates relative underrepresentation among nearby places.
 </div>
+{index === 0 && (
+  <div className="mt-4 rounded-xl border border-[#dbe7ff] bg-white p-4">
+    <div className="text-sm font-semibold text-[#172341]">
+      How SpotU decided
+    </div>
+
+    <div className="mt-3 space-y-2 text-base leading-6 text-[#65738d]">
+      <div>✓ Read this location&apos;s Qloo cultural signals</div>
+
+      <div>
+        ✓ Identified strongest signals:{" "}
+        {opportunity.strongestSignals
+          .slice(0, 3)
+          .map((signal) => signal.name)
+          .join(" · ")}
+      </div>
+
+      <div>
+        ✓ Evaluated {opportunities.length} business concepts
+      </div>
+
+      <div>
+        ✓ Compared Cultural Match with relative Market Gap Signal
+      </div>
+
+      <div className="font-semibold text-[#172341]">
+        ✓ Recommended {opportunity.name} — opportunity score{" "}
+        {opportunity.opportunityScore}
+      </div>
+    </div>
+  </div>
+)}
       </div>
     ))}
   </div>
@@ -837,7 +914,7 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
 
     <div className="mt-8 grid gap-5 lg:grid-cols-2">
       {/* LOCATION A */}
-      <div className="rounded-xl border border-[#dfe5ed] p-5">
+      <div className="self-start rounded-xl border border-[#dfe5ed] p-5">
         <div className="text-xs font-semibold uppercase tracking-wide text-[#8290a7]">
           Location A
         </div>
@@ -903,6 +980,39 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
 
         {comparisonAnalysis ? (
           <>
+          {selectedOpportunity && comparisonAnalysis.selectedOpportunity && (
+  <div className="mt-5 rounded-xl border border-[#b9d2ff] bg-[#f8fbff] p-5">
+    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1769ff]">
+      SpotU comparison
+    </div>
+
+    <div className="mt-2 text-xl font-bold text-[#172341]">
+      Better fit:{" "}
+      {selectedOpportunity.opportunityScore >=
+      comparisonAnalysis.selectedOpportunity.opportunityScore
+        ? locationLabel
+        : comparisonAnalysis.label}
+    </div>
+
+    <p className="mt-2 text-sm leading-6 text-[#65738d]">
+  {Math.abs(
+    selectedOpportunity.opportunityScore -
+      comparisonAnalysis.selectedOpportunity.opportunityScore
+  )}{" "}
+  points stronger for {selectedConcept}. Strongest supporting signals:{" "}
+  {(
+    selectedOpportunity.opportunityScore >=
+    comparisonAnalysis.selectedOpportunity.opportunityScore
+      ? selectedOpportunity.strongestSignals
+      : comparisonAnalysis.selectedOpportunity.strongestSignals
+  )
+    .slice(0, 3)
+    .map((signal) => signal.name)
+    .join(" · ")}
+  .
+</p>
+  </div>
+)}
             <div className="mt-5 text-2xl font-bold text-[#172341]">
               {comparisonAnalysis.label}
             </div>
@@ -1011,7 +1121,7 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
 
               <div className="rounded-lg bg-[#f6f8fb] p-3">
                 <div className="text-xs text-[#8290a7]">
-                  Whitespace Signal
+                  Market Gap Signal
                 </div>
                 <div className="mt-1 font-bold text-[#172341]">
                   {saved.selectedOpportunity?.whiteSpace ?? "—"}
@@ -1055,7 +1165,7 @@ const isCurrentAnalysisSaved = savedAnalyses.some(
       <div className="mt-10 grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-[#e3e8f0] bg-[#f8fafc] p-6">
           <div className="text-sm font-bold text-[#172341]">
-            Cultural Fit
+            Cultural Fit Index
           </div>
           <p className="mt-3 text-sm leading-6 text-[#65738d]">
             Measures how strongly the overall cultural identity of a location
